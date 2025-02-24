@@ -1,0 +1,154 @@
+package service
+
+import (
+	"encoding/json"
+	"errors"
+
+	iommodel "party/internal/model"
+	iom "gitlab.com/ft25/iom/framework/rabbitmq"
+)
+
+// @Summary GET_V1_Tokens
+// @Description Get All Token
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} iommodel.Token
+// @Failure 400 {object} iommodel.Failure
+// @Failure 404 {object} iommodel.Failure
+// @Failure 500 {object} iommodel.Failure
+// @Router /am/api/token-service/V1/tokens [get]
+func (s RestService) GET_V1_Tokens(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+
+	res, err := TokenService.List()
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// @Summary GET_V1_Tokens_Groups_ByGroups_Id_ById
+// @Description Get Token By Groups and Id
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} iommodel.Token
+// @Failure 400 {object} iommodel.Failure
+// @Failure 404 {object} iommodel.Failure
+// @Failure 500 {object} iommodel.Failure
+// @Router /am/api/token-service/V1/tokens/groups/:groups/id/:id [get]
+func (s RestService) GET_V1_Tokens_Groups_ByGroups_Id_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+
+	id := ctx.Routing.Params("id")
+	groups := ctx.Routing.Params("groups")
+
+	res, err := TokenService.GetByID(groups, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// @Summary GET_V1_Tokens_Groups_ByGroups
+// @Description Get Token By Groups
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} iommodel.Token
+// @Failure 400 {object} iommodel.Failure
+// @Failure 404 {object} iommodel.Failure
+// @Failure 500 {object} iommodel.Failure
+// @Router /am/api/token-service/V1/tokens/groups/:groups [get]
+func (s RestService) GET_V1_Tokens_Groups_ByGroups(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+
+	groups := ctx.Routing.Params("groups")
+
+	res, err := TokenService.GetByGroups(groups)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// @Summary POST_V1_Tokens
+// @Description Add Token
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} iommodel.Token
+// @Failure 400 {object} iommodel.Failure
+// @Failure 404 {object} iommodel.Failure
+// @Failure 500 {object} iommodel.Failure
+// @Router /am/api/token-service/V1/tokens [post]
+func (s RestService) POST_V1_Tokens(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+
+	var (
+		req iommodel.Token
+	)
+
+	err = json.Unmarshal(serviceRequest.([]byte), &req)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	res, err := TokenService.Create(&req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// @Summary PUT_V1_Tokens_Groups_ByGroups_Id_ById
+// @Description Update Token
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} iommodel.Token
+// @Failure 400 {object} iommodel.Failure
+// @Failure 404 {object} iommodel.Failure
+// @Failure 500 {object} iommodel.Failure
+// @Router /am/api/token-service/V1/tokens/:id [put]
+func (s RestService) PUT_V1_Tokens_Groups_ByGroups_Id_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+
+	var (
+		newToken, existToken iommodel.Token
+	)
+
+	ID := ctx.Routing.Params("id")
+	groups := ctx.Routing.Params("groups")
+	existToken.Groups = groups
+	existToken.ID = ID
+
+	err = json.Unmarshal(serviceRequest.([]byte), &newToken)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+
+	res, err := TokenService.Update(&newToken, &existToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// @Summary DELETE_V1_Tokens_ById
+// @Description Delete Token
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} iommodel.Token
+// @Failure 400 {object} iommodel.Failure
+// @Failure 404 {object} iommodel.Failure
+// @Failure 500 {object} iommodel.Failure
+// @Router /am/api/token-service/V1/tokens/:id [delete]
+func (s RestService) DELETE_V1_Tokens_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+
+	id := ctx.Routing.Params("id")
+	groups := ctx.Routing.Params("groups")
+
+	err = TokenService.Delete(groups, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}

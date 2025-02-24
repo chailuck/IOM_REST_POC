@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	iommodel "gitlab.com/ft25/iom/engine/am/internal/model"
+	iommodel "party/internal/model"
+
 	iom "gitlab.com/ft25/iom/framework/rabbitmq"
 )
 

@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"party/internal/crypto"
+
+	"party/internal/model"
+
 	"github.com/gocql/gocql"
-	"gitlab.com/ft25/iom/engine/am/internal/crypto"
-	"gitlab.com/ft25/iom/engine/am/internal/model"
 )
 
 type TokenRepository struct {

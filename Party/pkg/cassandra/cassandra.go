@@ -1,8 +1,9 @@
 package cassandra
 
 import (
+	"party/internal/config"
+
 	"github.com/gocql/gocql"
-	"gitlab.com/ft25/iom/engine/am/internal/config"
 )
 
 func NewCassandraConnection(cfg config.CassandraConfig) (*gocql.Session, error) {

@@ -4,16 +4,16 @@ import (
 	"log"
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
-	_ "gitlab.com/ft25/iom/engine/am/docs"
-	imservice "gitlab.com/ft25/iom/engine/am/pkg/service"
+	_ "party/docs"
+	imservice "party/pkg/service"
 	iomlog "gitlab.com/ft25/iom/framework/logger"
 	iomcore "gitlab.com/ft25/iom/framework/rabbitmq"
 	iomservice "gitlab.com/ft25/iom/framework/service"
 
-	"gitlab.com/ft25/iom/engine/am/internal/config"
-	"gitlab.com/ft25/iom/engine/am/internal/controller"
-	"gitlab.com/ft25/iom/engine/am/internal/repository"
-	"gitlab.com/ft25/iom/engine/am/pkg/cassandra"
+	"internal/config"
+	"internal/controller"
+	"internal/repository"
+	"am/pkg/cassandra"
 )
 
 // @title IOM.TokenService API

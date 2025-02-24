@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"gitlab.com/ft25/iom/engine/am/internal/model"
-	"gitlab.com/ft25/iom/engine/am/internal/repository"
+	"party/internal/model"
+	"party/internal/repository"
 )
 
 var (
