@@ -1,7 +1,7 @@
 package service
 
 import (
-	iomcontroller "internal/controller"
+	iomcontroller "party/internal/controller"
 
 	iomlistener "gitlab.com/ft25/iom/framework/service"
 )

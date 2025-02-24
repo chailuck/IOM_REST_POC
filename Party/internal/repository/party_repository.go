@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"internal/model"
+	"party/internal/model"
 
 	"gorm.io/gorm"
 )

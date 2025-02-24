@@ -3,7 +3,7 @@ package postgresql
 import (
 	"fmt"
 
-	"internal/config"
+	"party/internal/config"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -21,16 +21,19 @@ func NewPostgresConnection(cfg config.PostgresConfig) (*gorm.DB, error) {
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to PostgreSQL: %v", err)
 	}
 
 	// Configure connection pool
 	sqlDB, err := db.DB()
+
 	if err != nil {
 		return nil, err
 	}
 
+	fmt.Sprintf("Error := %s", err.Error)
 	// Set connection pool settings
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)

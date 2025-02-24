@@ -3,20 +3,21 @@ package main
 import (
 	"log"
 
-	"internal/model"
-	"pkg/postgresql"
+	"party/internal/model"
+	"party/pkg/postgresql"
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
 
-	imservice "pkg/service"
+	imservice "party/pkg/service"
 
 	iomlog "gitlab.com/ft25/iom/framework/logger"
 	iomcore "gitlab.com/ft25/iom/framework/rabbitmq"
 	iomservice "gitlab.com/ft25/iom/framework/service"
 
-	"internal/config"
-	"internal/controller"
-	"internal/repository"
+	"party/internal/controller"
+	"party/internal/repository"
+
+	"party/internal/config"
 )
 
 // @title IOM.PartyManagement API

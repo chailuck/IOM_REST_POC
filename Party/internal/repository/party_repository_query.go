@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"internal/model"
+	"party/internal/model"
 )
 
 // List retrieves parties based on query parameters
