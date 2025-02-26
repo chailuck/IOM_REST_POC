@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"party/internal/model"
 	"strings"
 	"time"
+
+	"party/internal/model"
 )
 
 var (
@@ -15,7 +16,7 @@ var (
 )
 
 // validateAddressUpdate validates address updates
-func (s *PartyService) validateAddressUpdate(addresses []model.PartyAddress) error {
+func (s *PartyService) validateAddressUpdate(addresses []model.ContactMedium) error {
 	for _, addr := range addresses {
 		if err := addr.Validate(); err != nil {
 			return err
@@ -70,11 +71,11 @@ func (s *PartyService) validatePartyUpdate(party *model.Individual) error {
 		return err
 	}
 
-	if err := s.validateAddressUpdate(party.Address); err != nil {
+	if err := s.validateAddressUpdate(party.ContactMedium); err != nil {
 		return err
 	}
 
-	if err := s.validateCharacteristicUpdate(party.Characteristic); err != nil {
+	if err := s.validateCharacteristicUpdate(party.Characteristics); err != nil {
 		return err
 	}
 
@@ -103,7 +104,7 @@ func (s *PartyService) preparePartyResponse(party *model.Individual) *model.Part
 // This produces a 15-character ID that meets the database requirements
 func generateUniqueID(prefix string) string {
 	// Initialize random number generator
-	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Get current timestamp in format YYMMDDHHmm (10 characters)
 	timestamp := time.Now().Format("0601021504")
@@ -112,7 +113,7 @@ func generateUniqueID(prefix string) string {
 	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	suffix := make([]byte, 2)
 	for i := range suffix {
-		suffix[i] = chars[rand.Intn(len(chars))]
+		suffix[i] = chars[r.Intn(len(chars))]
 	}
 
 	// Ensure prefix is exactly 3 characters

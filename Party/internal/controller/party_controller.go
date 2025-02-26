@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"party/internal/model"
@@ -36,25 +37,27 @@ func (s *PartyService) CreateParty(party *model.Individual) (*model.Individual, 
 
 	// Generate a unique 15-char ID for party
 	party.ID = generateUniqueID("PTY")
-	party.CreatedDate = time.Now()
-	party.ModifiedDate = time.Now()
+	party.CreationDate = time.Now()
+	party.ModificationDate = time.Now()
+	party.CreatedBy = "system"  // Or pass in from context
+	party.ModifiedBy = "system" // Or pass in from context
 
-	// Set default values for addresses
-	for i := range party.Address {
-		if party.Address[i].ID == "" {
-			party.Address[i].ID = generateUniqueID("ADR")
+	// Set default values for contact media (addresses)
+	for i := range party.ContactMedium {
+		if party.ContactMedium[i].ID == "" {
+			party.ContactMedium[i].ID = generateUniqueID("ADR")
+			fmt.Printf("ADDRESS UNIQUE:%s TYPE: %s (%s)\n", party.ContactMedium[i].ID, party.ContactMedium[i].MediumType, party.ContactMedium[i].Street1)
+			//party.ContactMedium[i].ID = generateUniqueID("ADR") + "_" + party.ContactMedium[i].MediumType
 		}
-		party.Address[i].CreatedDate = time.Now()
-		party.Address[i].ModifiedDate = time.Now()
 	}
 
 	// Set default values for characteristics
-	for i := range party.Characteristic {
-		if party.Characteristic[i].ID == "" {
-			party.Characteristic[i].ID = generateUniqueID("ATR")
+	for i := range party.Characteristics {
+		if party.Characteristics[i].ID == "" {
+			party.Characteristics[i].ID = generateUniqueID("ATR")
+			fmt.Printf("CHARACTERISTIC UNIQUE:%s TYPE: %s\n", party.Characteristics[i].ID, party.Characteristics[i].Name)
+			//party.Characteristics[i].ID = generateUniqueID("ATR") + "_" + party.Characteristics[i].Name
 		}
-		party.Characteristic[i].CreatedDate = time.Now()
-		party.Characteristic[i].ModifiedDate = time.Now()
 	}
 
 	return s.partyRepo.Create(party)
@@ -80,22 +83,22 @@ func (s *PartyService) UpdateParty(id string, party *model.Individual) (*model.I
 
 	// Update fields while preserving immutable data
 	party.ID = existing.ID
-	party.CreatedDate = existing.CreatedDate
-	party.ModifiedDate = time.Now()
+	party.CreationDate = existing.CreationDate
+	party.CreatedBy = existing.CreatedBy
+	party.ModificationDate = time.Now()
+	party.ModifiedBy = "system" // Or pass in from context
 
-	// Update related entities
-	for i := range party.Address {
-		if party.Address[i].ID == "" {
-			party.Address[i].ID = generateUniqueID("ADR")
+	// Ensure proper IDs for related entities
+	for i := range party.ContactMedium {
+		if party.ContactMedium[i].ID == "" {
+			party.ContactMedium[i].ID = generateUniqueID("ADR")
 		}
-		party.Address[i].ModifiedDate = time.Now()
 	}
 
-	for i := range party.Characteristic {
-		if party.Characteristic[i].ID == "" {
-			party.Characteristic[i].ID = generateUniqueID("ATR")
+	for i := range party.Characteristics {
+		if party.Characteristics[i].ID == "" {
+			party.Characteristics[i].ID = generateUniqueID("ATR")
 		}
-		party.Characteristic[i].ModifiedDate = time.Now()
 	}
 
 	return s.partyRepo.Update(party)
@@ -133,8 +136,8 @@ func (s *PartyService) UpdatePartyStatus(id string, status string) error {
 	return s.partyRepo.UpdateStatus(id, status)
 }
 
-// AddCharacteristic adds a new characteristic to a party
-func (s *PartyService) AddCharacteristic(partyID string, characteristic *model.Characteristic) error {
+// AddPartyCharacteristic adds a new characteristic to a party
+func (s *PartyService) AddPartyCharacteristic(partyID string, characteristic *model.Characteristic) error {
 	// Validate characteristic
 	if err := characteristic.Validate(); err != nil {
 		return err
@@ -148,17 +151,43 @@ func (s *PartyService) AddCharacteristic(partyID string, characteristic *model.C
 
 	characteristic.PartyID = partyID
 	characteristic.ID = generateUniqueID("ATR")
-	characteristic.CreatedDate = time.Now()
-	characteristic.ModifiedDate = time.Now()
 
 	return s.partyRepo.AddCharacteristic(characteristic)
 }
 
 // SearchParties searches for parties using various criteria
-func (s *PartyService) SearchParties(params model.PartyQueryParams) ([]model.Individual, error) {
-	if params.Limit == 0 {
-		params.Limit = 50 // Default limit
+func (s *PartyService) SearchParties(criteria map[string]interface{}) ([]model.Individual, error) {
+	return s.partyRepo.SearchParties(criteria)
+}
+
+// GetPartyByPhoneNumber finds parties by phone number
+func (s *PartyService) GetPartyByPhoneNumber(phoneNumber string) ([]model.Individual, error) {
+	if phoneNumber == "" {
+		return nil, errors.New("phone number is required")
 	}
 
-	return s.partyRepo.List(params)
+	return s.partyRepo.GetPartyByPhoneNumber(phoneNumber)
+}
+
+// GetPartyByAddress finds parties by address criteria
+func (s *PartyService) GetPartyByAddress(postalCode, district, subDistrict string) ([]model.Individual, error) {
+	return s.partyRepo.GetPartyByAddress(postalCode, district, subDistrict)
+}
+
+// GetPartyByExternalID finds a party by external ID
+func (s *PartyService) GetPartyByExternalID(extIDType, extID string) (*model.Individual, error) {
+	if extID == "" {
+		return nil, errors.New("external ID is required")
+	}
+
+	return s.partyRepo.GetPartyByExternalID(extIDType, extID)
+}
+
+// CountPartiesByType gets a count of parties by type
+func (s *PartyService) CountPartiesByType(partyType string) (int64, error) {
+	if partyType == "" {
+		return 0, errors.New("party type is required")
+	}
+
+	return s.partyRepo.CountPartiesByType(partyType)
 }

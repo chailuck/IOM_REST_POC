@@ -5,7 +5,6 @@ go 1.22
 toolchain go1.22.12
 
 require (
-	github.com/arsmn/fiber-swagger/v2 v2.31.1
 	github.com/gocql/gocql v0.0.0-20190910075112-d63913db787c
 	github.com/swaggo/swag v1.16.4
 	gitlab.com/ft25/iom/framework v0.0.0-00010101000000-000000000000
@@ -61,7 +60,6 @@ require (
 	github.com/redis/go-redis/v9 v9.6.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rs/zerolog v1.33.0 // indirect
-	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect

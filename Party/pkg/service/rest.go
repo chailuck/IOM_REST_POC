@@ -171,13 +171,6 @@ func (s RestService) Patch_Individual_ById(ctx iom.Context, serviceRequest inter
 		return nil, err
 	}
 
-	// Merge changes
-	if req.FirstName != "" {
-		existing.FirstName = req.FirstName
-	}
-	if req.LastName != "" {
-		existing.LastName = req.LastName
-	}
 	// Add other field merges as needed
 
 	res, err := PartyService.UpdateParty(id, existing)

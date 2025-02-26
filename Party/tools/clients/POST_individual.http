@@ -1,66 +1,136 @@
 curl -X POST  -H "Content-Type:application/json" 
 -d 
 '{
-  "idType": "NID",
-  "idNumber": "1234567890123",
-  "language": "th",
-  "title": "Mr",
-  "firstName": "Somchai",
-  "lastName": "Jaidee",
-  "maritalStatus": "single",
-  "gender": "male",
+  "@type": "INDY",
+  "individualIdentification": [
+    {
+      "identificationType": "01",
+      "identificationId": "1234567890123",
+      "validFor": {
+        "endDateTime": "2030-12-31T00:00:00Z"
+      }
+    }
+  ],
+  "language": "T",
+  "phoneNumber": "0891234567",
+  "title": "Mr.",
+  "givenName": "Somchai",
+  "familyName": "Jaidee",
+  "maritalStatus": "S",
+  "gender": "M",
+  "nameType": "INDY",
+  "contactLanguage": "THA",
   "nationality": "THA",
-  "contactLanguage": "tha",
   "birthDate": "1990-05-15T00:00:00Z",
-  "idExpiryDate": "2030-12-31T00:00:00Z",
-  "status": "active",
-  "subType": "individual",
+  
+  "externalReference": [
+    {
+      "type": "PartyExtBillingID",
+      "name": "BIL12345678"
+    },
+    {
+      "type": "PartyExtID",
+      "name": "EXT98765432"
+    }
+  ],
+  
+  "partyCharacteristic": [
+    {
+      "name": "occupationCode",
+      "value": "502"
+    },
+    {
+      "name": "timeInBusiness",
+      "value": "0101"
+    },
+    {
+      "name": "salaryLevel",
+      "value": "01"
+    },
+    {
+      "name": "grade",
+      "value": "1"
+    },
+    {
+      "name": "largeCustomerIndicator",
+      "value": "78"
+    },
+    {
+      "name": "subscriberType",
+      "value": "RPI"
+    },
+    {
+      "name": "sourceCustomerType",
+      "value": "73"
+    },
+    {
+      "name": "parentTitle",
+      "value": "Ms."
+    },
+    {
+      "name": "parentFirstName",
+      "value": "Somsri"
+    },
+    {
+      "name": "parentLastName",
+      "value": "Jaidee"
+    },
+    {
+      "name": "parentContact",
+      "value": "0896543210"
+    },
+    {
+      "name": "parentId",
+      "value": "1234567890124"
+    },
+    {
+      "name": "totalNoOfSubscriber",
+      "value": "3"
+    },
+    {
+      "name": "maxAllowOnlySubscriber",
+      "value": "5"
+    },
+    {
+      "name": "dealPool",
+      "value": "STANDARD"
+    },
+    {
+      "name": "loyalty",
+      "value": "GOLD"
+    }
+  ],
+  
   "contactMedium": [
     {
-      "mediumType": "mobile",
+      "type": "phone",
       "preferred": true,
       "phoneNumber": "0891234567"
     },
     {
-      "mediumType": "email",
-      "phoneNumber": "somchai@example.com"
-    }
-  ],
-  "characteristic": [
-    {
-      "name": "occupation",
-      "value": "engineer"
-    },
-    {
-      "name": "incomeRange",
-      "value": "50000-100000"
-    },
-    {
-      "name": "education",
-      "value": "bachelor"
-    }
-  ],
-  "address": [
-    {
-      "addressType": "billing",
+      "type": "address",
+      "addressType": "01",
       "street1": "123 Sukhumvit Road",
       "street2": "Apartment 456",
-      "district": "Watthana",
-      "subDistrict": "Khlong Toei Nuea",
-      "postalCode": "10110",
+      "postCode": "10110",
       "country": "THA",
-      "buildingName": "Sukhumvit Tower",
-      "homeNumber": "123/456",
-      "moo": "5"
+      "building": "Sukhumvit Tower",
+      "homenumber": "123/456",
+      "moo": "5",
+      "tumbol": "Khlong",
+      "city": "Watthana",
+      "accomdationType": "HOME",
+      "time_at_addr": "24"
     },
     {
-      "addressType": "shipping",
+      "type": "address",
+      "addressType": "02",
       "street1": "789 Silom Road",
-      "district": "Bang Rak",
-      "subDistrict": "Silom",
-      "postalCode": "10500",
+      "postCode": "10500",
       "country": "THA",
-      "homeNumber": "789"
+      "homenumber": "789",
+      "tumbol": "Silom",
+      "city": "Bang Rak"
     }
   ]
 }'
