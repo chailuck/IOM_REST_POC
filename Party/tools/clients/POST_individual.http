@@ -1,0 +1,68 @@
+curl -X POST  -H "Content-Type:application/json" 
+-d 
+'{
+  "idType": "NID",
+  "idNumber": "1234567890123",
+  "language": "th",
+  "title": "Mr",
+  "firstName": "Somchai",
+  "lastName": "Jaidee",
+  "maritalStatus": "single",
+  "gender": "male",
+  "nationality": "THA",
+  "contactLanguage": "tha",
+  "birthDate": "1990-05-15T00:00:00Z",
+  "idExpiryDate": "2030-12-31T00:00:00Z",
+  "status": "active",
+  "subType": "individual",
+  "contactMedium": [
+    {
+      "mediumType": "mobile",
+      "preferred": true,
+      "phoneNumber": "0891234567"
+    },
+    {
+      "mediumType": "email",
+      "phoneNumber": "somchai@example.com"
+    }
+  ],
+  "characteristic": [
+    {
+      "name": "occupation",
+      "value": "engineer"
+    },
+    {
+      "name": "incomeRange",
+      "value": "50000-100000"
+    },
+    {
+      "name": "education",
+      "value": "bachelor"
+    }
+  ],
+  "address": [
+    {
+      "addressType": "billing",
+      "street1": "123 Sukhumvit Road",
+      "street2": "Apartment 456",
+      "district": "Watthana",
+      "subDistrict": "Khlong Toei Nuea",
+      "postalCode": "10110",
+      "country": "THA",
+      "buildingName": "Sukhumvit Tower",
+      "homeNumber": "123/456",
+      "moo": "5"
+    },
+    {
+      "addressType": "shipping",
+      "street1": "789 Silom Road",
+      "district": "Bang Rak",
+      "subDistrict": "Silom",
+      "postalCode": "10500",
+      "country": "THA",
+      "homeNumber": "789"
+    }
+  ]
+}'
+
+http://localhost:9999/party/api/partymanagement/V1/individual

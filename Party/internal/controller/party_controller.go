@@ -6,8 +6,6 @@ import (
 
 	"party/internal/model"
 	"party/internal/repository"
-
-	"github.com/google/uuid"
 )
 
 type PartyService struct {
@@ -36,15 +34,15 @@ func (s *PartyService) CreateParty(party *model.Individual) (*model.Individual, 
 		return nil, model.ErrDuplicateParty
 	}
 
-	// Set default values
-	party.ID = uuid.New().String()
+	// Generate a unique 15-char ID for party
+	party.ID = generateUniqueID("PTY")
 	party.CreatedDate = time.Now()
 	party.ModifiedDate = time.Now()
 
 	// Set default values for addresses
 	for i := range party.Address {
 		if party.Address[i].ID == "" {
-			party.Address[i].ID = uuid.New().String()
+			party.Address[i].ID = generateUniqueID("ADR")
 		}
 		party.Address[i].CreatedDate = time.Now()
 		party.Address[i].ModifiedDate = time.Now()
@@ -53,7 +51,7 @@ func (s *PartyService) CreateParty(party *model.Individual) (*model.Individual, 
 	// Set default values for characteristics
 	for i := range party.Characteristic {
 		if party.Characteristic[i].ID == "" {
-			party.Characteristic[i].ID = uuid.New().String()
+			party.Characteristic[i].ID = generateUniqueID("ATR")
 		}
 		party.Characteristic[i].CreatedDate = time.Now()
 		party.Characteristic[i].ModifiedDate = time.Now()
@@ -88,14 +86,14 @@ func (s *PartyService) UpdateParty(id string, party *model.Individual) (*model.I
 	// Update related entities
 	for i := range party.Address {
 		if party.Address[i].ID == "" {
-			party.Address[i].ID = uuid.New().String()
+			party.Address[i].ID = generateUniqueID("ADR")
 		}
 		party.Address[i].ModifiedDate = time.Now()
 	}
 
 	for i := range party.Characteristic {
 		if party.Characteristic[i].ID == "" {
-			party.Characteristic[i].ID = uuid.New().String()
+			party.Characteristic[i].ID = generateUniqueID("ATR")
 		}
 		party.Characteristic[i].ModifiedDate = time.Now()
 	}
@@ -149,7 +147,7 @@ func (s *PartyService) AddCharacteristic(partyID string, characteristic *model.C
 	}
 
 	characteristic.PartyID = partyID
-	characteristic.ID = uuid.New().String()
+	characteristic.ID = generateUniqueID("ATR")
 	characteristic.CreatedDate = time.Now()
 	characteristic.ModifiedDate = time.Now()
 

@@ -7,7 +7,6 @@ toolchain go1.22.12
 require (
 	github.com/arsmn/fiber-swagger/v2 v2.31.1
 	github.com/gocql/gocql v0.0.0-20190910075112-d63913db787c
-	github.com/google/uuid v1.6.0
 	github.com/swaggo/swag v1.16.4
 	gitlab.com/ft25/iom/framework v0.0.0-00010101000000-000000000000
 	gorm.io/driver/postgres v1.5.11
@@ -36,6 +35,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
 	github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect

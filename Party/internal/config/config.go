@@ -1,7 +1,9 @@
 package config
 
 type Config struct {
-	PostgresConfig PostgresConfig
+	PostgresConfig  PostgresConfig
+	CassandraConfig CassandraConfig
+	EncryptionKey   string
 }
 
 type PostgresConfig struct {
@@ -11,6 +13,13 @@ type PostgresConfig struct {
 	Username string
 	Password string
 	SSLMode  string
+}
+
+type CassandraConfig struct {
+	Hosts    []string
+	Keyspace string
+	Username string
+	Password string
 }
 
 func New() *Config {
@@ -23,5 +32,12 @@ func New() *Config {
 			Password: "password",
 			SSLMode:  "disable",
 		},
+		CassandraConfig: CassandraConfig{
+			Hosts:    []string{"172.16.2.114"},
+			Keyspace: "iom",
+			Username: "omx_sa",
+			Password: "omx_sa",
+		},
+		EncryptionKey: "your-32-byte-encryption-key-here",
 	}
 }

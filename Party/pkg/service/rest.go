@@ -24,7 +24,7 @@ import (
 // func (s RestService) PUT_V1_Tokens_Groups_ByGroups_Id_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
 
 // @Router /partyManagement/v1/individual [post]
-func (s RestService) PUT_V1_Individual(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+func (s RestService) POST_V1_Individual(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
 	//func (s RestService) Create_Individual(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
 	var req model.Individual
 	err = json.Unmarshal(serviceRequest.([]byte), &req)

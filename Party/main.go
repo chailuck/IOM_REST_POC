@@ -6,8 +6,6 @@ import (
 	"party/internal/model"
 	"party/pkg/postgresql"
 
-	swagger "github.com/arsmn/fiber-swagger/v2"
-
 	imservice "party/pkg/service"
 
 	iomlog "gitlab.com/ft25/iom/framework/logger"
@@ -66,18 +64,23 @@ func main() {
 	imservice.NewRestServiceController(partyService)
 
 	// Initialize route services
-	routeServices, err := iomservice.LoadService(ctx, "party.PartyManagement", []interface{}{imservice.RestService{}})
+	routeServices, err := iomservice.LoadService(ctx, "party.Partymanagement", []interface{}{imservice.RestService{}})
 	if err != nil {
 		log.Fatalf("Failed to load service: %v", err)
 	}
 
 	// Initialize REST service
+	/*
+		srv := iomservice.NewRestService(
+			iomservice.WithAuthen(&ctx),
+			iomservice.WithHealthcheck(),
+			iomservice.WithLogger(nil),
+			iomservice.WithRoute(routeServices),
+			iomservice.WithSwagger("/swagger/*", swagger.HandlerDefault),
+		)
+	*/
 	srv := iomservice.NewRestService(
-		iomservice.WithAuthen(&ctx),
-		iomservice.WithHealthcheck(),
-		iomservice.WithLogger(nil),
 		iomservice.WithRoute(routeServices),
-		iomservice.WithSwagger("/swagger/*", swagger.HandlerDefault),
 	)
 
 	// Start the service

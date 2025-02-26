@@ -2,8 +2,11 @@ package controller
 
 import (
 	"errors"
-
+	"fmt"
+	"math/rand"
 	"party/internal/model"
+	"strings"
+	"time"
 )
 
 var (
@@ -93,4 +96,42 @@ func (s *PartyService) preparePartyResponse(party *model.Individual) *model.Part
 	return &model.PartyCreateResponse{
 		Data: party,
 	}
+}
+
+// generateUniqueID creates a unique ID with the specified prefix
+// Format: PPP + YYMMDDHHmmXXXXX (where PPP is the prefix, and XXXXX is random chars)
+// This produces a 15-character ID that meets the database requirements
+func generateUniqueID(prefix string) string {
+	// Initialize random number generator
+	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	// Get current timestamp in format YYMMDDHHmm (10 characters)
+	timestamp := time.Now().Format("0601021504")
+
+	// Generate random suffix (2 characters)
+	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	suffix := make([]byte, 2)
+	for i := range suffix {
+		suffix[i] = chars[rand.Intn(len(chars))]
+	}
+
+	// Ensure prefix is exactly 3 characters
+	paddedPrefix := prefix
+	if len(paddedPrefix) > 3 {
+		paddedPrefix = paddedPrefix[:3]
+	} else if len(paddedPrefix) < 3 {
+		paddedPrefix = fmt.Sprintf("%-3s", paddedPrefix)
+	}
+
+	// Combine parts to create the ID
+	id := fmt.Sprintf("%s%s%s", paddedPrefix, timestamp, string(suffix))
+
+	// Ensure the ID is exactly 15 characters
+	if len(id) > 15 {
+		id = id[:15]
+	} else if len(id) < 15 {
+		id = fmt.Sprintf("%-15s", id)
+	}
+
+	return strings.ToUpper(id)
 }

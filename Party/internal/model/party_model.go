@@ -6,7 +6,7 @@ import (
 
 // Individual represents a human party in the TMF632 model
 type Individual struct {
-	ID              string    `json:"id" gorm:"column:paty_row_id;primaryKey"`
+	ID              string    `json:"id" gorm:"column:paty_row_id;primaryKey;type:char(15)"`
 	IDType          string    `json:"idType" gorm:"column:id_type"`
 	IDNumber        string    `json:"idNumber" gorm:"column:id_numb"`
 	Language        string    `json:"language" gorm:"column:lang"`
@@ -47,8 +47,8 @@ type ContactMedium struct {
 
 // Characteristic represents party attributes/characteristics
 type Characteristic struct {
-	ID           string    `json:"id" gorm:"column:attr_row_id;primaryKey"`
-	PartyID      string    `json:"partyId" gorm:"column:paty_row_id"`
+	ID           string    `json:"id" gorm:"column:attr_row_id;primaryKey;type:char(15)"`
+	PartyID      string    `json:"partyId" gorm:"column:paty_row_id;type:char(15)"`
 	Name         string    `json:"name" gorm:"column:attr_name"`
 	Value        string    `json:"value" gorm:"column:attr_vlue"`
 	CreatedDate  time.Time `json:"createdDate" gorm:"column:crtd_dttm"`
@@ -57,8 +57,8 @@ type Characteristic struct {
 
 // PartyAddress represents a party's address
 type PartyAddress struct {
-	ID           string    `json:"id" gorm:"column:addr_row_id;primaryKey"`
-	PartyID      string    `json:"partyId" gorm:"column:paty_row_id"`
+	ID           string    `json:"id" gorm:"column:addr_row_id;primaryKey;type:char(15)"`
+	PartyID      string    `json:"partyId" gorm:"column:paty_row_id;type:char(15)"`
 	AddressType  string    `json:"addressType" gorm:"column:addr_type"`
 	Street1      string    `json:"street1" gorm:"column:adr1"`
 	Street2      string    `json:"street2" gorm:"column:adr2"`
@@ -102,4 +102,16 @@ type PartyQueryParams struct {
 	Status    string `json:"status"`
 	Limit     int    `json:"limit"`
 	Offset    int    `json:"offset"`
+}
+
+func (Individual) TableName() string {
+	return "cst_paty"
+}
+
+func (Characteristic) TableName() string {
+	return "cst_paty_attr"
+}
+
+func (PartyAddress) TableName() string {
+	return "cst_paty_addr"
 }
