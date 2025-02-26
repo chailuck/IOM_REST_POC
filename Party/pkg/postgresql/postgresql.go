@@ -33,7 +33,6 @@ func NewPostgresConnection(cfg config.PostgresConfig) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	fmt.Sprintf("Error := %s", err.Error)
 	// Set connection pool settings
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)

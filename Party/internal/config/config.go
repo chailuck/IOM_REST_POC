@@ -16,11 +16,11 @@ type PostgresConfig struct {
 func New() *Config {
 	return &Config{
 		PostgresConfig: PostgresConfig{
-			Host:     "localhost",
+			Host:     "192.168.10.109",
 			Port:     5432,
-			Database: "partydb",
-			Username: "party_user",
-			Password: "party_password",
+			Database: "new_om_poc",
+			Username: "user",
+			Password: "password",
 			SSLMode:  "disable",
 		},
 	}
