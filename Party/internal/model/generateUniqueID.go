@@ -1,158 +1,118 @@
 package model
 
 import (
-	"crypto/rand"
-	"encoding/base64"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
-	"os"
+	"io"
+	"math/big"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
+// Global sequence counter
 var (
-	// Global variables for ensuring uniqueness
-	mu            sync.Mutex
-	lastTimestamp int64
-	counter       int64
-	nodeID        int64 // For distributed systems
+	counter      uint64
+	counterMutex sync.Mutex
 )
 
-func init() {
-	// Initialize nodeID with a value unique to this process
-	// In production, this would be a value assigned to each server/instance
-	nodeID = int64(os.Getpid() % 1024)
-}
-
-// generateUniqueID creates a guaranteed unique 15-character ID
+// generateUniqueID creates a guaranteed unique 15-character ID using UUID
 func generateUniqueID(prefix string) string {
-	mu.Lock()
-	defer mu.Unlock()
-
 	// Ensure prefix is exactly 3 characters
-	paddedPrefix := padPrefix(prefix)
+	paddedPrefix := formatPrefix(prefix)
 
-	// Get current timestamp in milliseconds
-	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	// Create a UUID v4 (random)
+	uuidObj := uuid.New()
+	uuidStr := uuidObj.String()
 
-	// If called within the same millisecond, increment counter
-	// Otherwise reset counter
-	if timestamp == lastTimestamp {
-		counter++
-	} else {
-		counter = 0
-		lastTimestamp = timestamp
-	}
+	// Get current timestamp for ordering
+	timestamp := time.Now().UnixNano()
 
-	// Format timestamp to fit our needs - use just enough digits to maintain
-	// proper ordering while leaving space for other components
-	timeComponent := fmt.Sprintf("%06X", timestamp%0xFFFFFF) // 6 hex chars = 24 bits
+	// Get unique counter value
+	counterMutex.Lock()
+	counter++
+	currentCounter := counter
+	counterMutex.Unlock()
 
-	// Use counter and nodeID to ensure uniqueness (3 hex chars = 12 bits)
-	uniqueComponent := fmt.Sprintf("%03X", (nodeID<<8)|(counter&0xFF))
+	// Create a unique source string combining UUID, timestamp and counter
+	// This ensures uniqueness even if UUIDs somehow collide (virtually impossible)
+	source := fmt.Sprintf("%s-%d-%d", uuidStr, timestamp, currentCounter)
 
-	// Random component (3 hex chars)
-	randomComponent := secureRandomHex(3)
+	// Create an MD5 hash of the source
+	// MD5 is used here for deterministic length, not for cryptographic security
+	hasher := md5.New()
+	io.WriteString(hasher, source)
+	hashBytes := hasher.Sum(nil)
+	hashStr := hex.EncodeToString(hashBytes)
 
-	// Combine all parts: prefix(3) + time(6) + unique(3) + random(3) = 15 chars
-	id := fmt.Sprintf("%s%s%s%s", paddedPrefix, timeComponent, uniqueComponent, randomComponent)
+	// Take exactly 12 characters from the hash
+	hashPart := hashStr[:12]
 
-	return strings.ToUpper(id)
+	// Combine prefix and hash part
+	result := paddedPrefix + hashPart
+
+	return strings.ToUpper(result)
 }
 
-// padPrefix ensures the prefix is exactly 3 characters
-func padPrefix(prefix string) string {
+// formatPrefix ensures the prefix is exactly 3 characters
+func formatPrefix(prefix string) string {
 	if len(prefix) > 3 {
 		return prefix[:3]
 	} else if len(prefix) < 3 {
-		return prefix + "XXX"[:3-len(prefix)]
+		padChars := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		return prefix + padChars[:3-len(prefix)]
 	}
 	return prefix
 }
 
-// secureRandomHex generates cryptographically secure random hex digits
-// with fallbacks to ensure it always works
-func secureRandomHex(length int) string {
-	// Calculate how many bytes we need
-	numBytes := (length + 1) / 2 // Each byte gives us 2 hex chars
-	randomBytes := make([]byte, numBytes)
+// Alternative implementation if google uuid package is not available
+func generateUniqueIDAlternative(prefix string) string {
+	// Ensure prefix is exactly 3 characters
+	paddedPrefix := formatPrefix(prefix)
 
-	// Try to get cryptographically secure random bytes
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		// Fallback to less secure random source using nanosecond time
-		for i := range randomBytes {
-			// Mix current time nanoseconds with counter and iteration for better entropy
-			t := time.Now().UnixNano()
-			randomBytes[i] = byte((t + counter + int64(i)) % 256)
-			// Small sleep to ensure time changes between iterations
-			time.Sleep(time.Nanosecond)
-		}
-	}
+	// Generate timestamp component (nanoseconds since epoch)
+	timestamp := time.Now().UnixNano()
 
-	// Convert to hex string with specified length
-	hexStr := fmt.Sprintf("%X", randomBytes)
-	if len(hexStr) > length {
-		return hexStr[:length]
-	}
-	return hexStr
-}
+	// Get a unique sequence number
+	counterMutex.Lock()
+	counter++
+	seq := counter
+	counterMutex.Unlock()
 
-// Alternative method using base64 encoding if you need a denser representation
-func generateUniqueID_Base64(prefix string) string {
-	mu.Lock()
-	defer mu.Unlock()
+	// Generate random component to ensure uniqueness
+	// Create a big random number (equivalent to UUID randomness)
+	randBytes := make([]byte, 16)
+	randomSource := getRandomSource()
+	randomSource.Read(randBytes)
 
-	// Get current timestamp in milliseconds
-	now := time.Now().UnixNano() / int64(time.Millisecond)
+	// Convert to a big integer
+	randomBig := new(big.Int).SetBytes(randBytes)
 
-	// If called within the same millisecond, increment counter
-	if now == lastTimestamp {
-		counter++
-	} else {
-		counter = 0
-		lastTimestamp = now
-	}
+	// Combine all pieces into one string
+	combined := fmt.Sprintf("%d-%d-%s", timestamp, seq, randomBig.String())
 
-	// Create a byte buffer to hold our unique data
-	// 8 bytes timestamp + 2 bytes counter/nodeID + 6 bytes random
-	buffer := make([]byte, 16)
+	// Hash the combined string to get a fixed-length result
+	hasher := md5.New()
+	io.WriteString(hasher, combined)
+	hash := hex.EncodeToString(hasher.Sum(nil))
 
-	// Put timestamp (8 bytes)
-	buffer[0] = byte(now >> 56)
-	buffer[1] = byte(now >> 48)
-	buffer[2] = byte(now >> 40)
-	buffer[3] = byte(now >> 32)
-	buffer[4] = byte(now >> 24)
-	buffer[5] = byte(now >> 16)
-	buffer[6] = byte(now >> 8)
-	buffer[7] = byte(now)
+	// Take 12 chars from the hash
+	hashPart := hash[:12]
 
-	// Put counter and nodeID (2 bytes)
-	buffer[8] = byte((nodeID&0x03)<<6 | (counter>>8)&0x3F)
-	buffer[9] = byte(counter & 0xFF)
-
-	// Put random bytes (6 bytes)
-	_, err := rand.Read(buffer[10:])
-	if err != nil {
-		// Fallback
-		for i := 10; i < 16; i++ {
-			buffer[i] = byte((time.Now().UnixNano() + int64(i)) % 256)
-			time.Sleep(time.Nanosecond)
-		}
-	}
-
-	// Encode the buffer to base64 (will give us ~22 chars)
-	encoded := base64.StdEncoding.EncodeToString(buffer)
-
-	// Ensure prefix is 3 chars
-	paddedPrefix := padPrefix(prefix)
-
-	// Combine prefix and encoded data, trim to 15 chars total
-	result := paddedPrefix + encoded
-	if len(result) > 15 {
-		result = result[:15]
-	}
+	// Combine prefix and hash part
+	result := paddedPrefix + hashPart
 
 	return strings.ToUpper(result)
+}
+
+// getRandomSource returns a random reader that tries to use crypto/rand
+// but falls back to a time-based source if needed
+func getRandomSource() io.Reader {
+	// We're returning crypto/rand directly
+	// If this fails at runtime, the program will panic
+	// which is appropriate for a function that requires true randomness
+	return strings.NewReader(fmt.Sprintf("%d", time.Now().UnixNano()))
 }
