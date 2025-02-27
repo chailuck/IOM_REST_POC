@@ -106,8 +106,8 @@ func generateUniqueID(prefix string) string {
 	// Initialize random number generator
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	// Get current timestamp in format YYMMDDHHmm (10 characters)
-	timestamp := time.Now().Format("0601021504")
+	// Get current timestamp in format MMDDmmss (8 characters)
+	timestamp := time.Now().Format("01020405")
 
 	// Generate random suffix (2 characters)
 	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

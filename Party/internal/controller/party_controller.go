@@ -26,9 +26,10 @@ func (s *PartyService) CreateIndividual(individual *model.Individual) (*model.In
 	if err := individual.Validate(); err != nil {
 		return nil, err
 	}
-
+	idType := individual.IndividualIdentification[0].IdentificationType
+	idNumber := individual.IndividualIdentification[0].IdentificationId
 	// Check for existing party with same identification
-	existing, err := s.partyRepo.GetByIdentification(individual.IDType, individual.IDNumber)
+	existing, err := s.partyRepo.GetByIdentification(idType, idNumber)
 	if err != nil && !errors.Is(err, model.ErrPartyNotFound) {
 		return nil, err
 	}
@@ -54,14 +55,18 @@ func (s *PartyService) CreateIndividual(individual *model.Individual) (*model.In
 
 	// Set default values for contact media (addresses)
 	for i := range individual.ContactMedium {
-		if individual.ContactMedium[i].ID == "" {
-			if (individual.ContactMedium[i].Type == model.EntityTypeContactMediumPhone) && (individual.ContactMedium[i].MediumType == model.EntityTypeContactMediumTypeHomePhoneNumber) {
-				individual.ContactMedium[i].ID = "HOMEPHONE_" + individual.ID
-			} else {
-				individual.ContactMedium[i].ID = generateUniqueID("ADR")
+
+		if (individual.ContactMedium[i].Type == model.EntityTypeContactMediumPhone) && (individual.ContactMedium[i].MediumType == model.EntityTypeContactMediumTypeHomePhoneNumber) {
+			individual.ContactMedium[i].ID = "HPN" + individual.ID
+		} else if individual.ContactMedium[i].Type == model.EntityTypeContactMediumAddress {
+			individual.ContactMedium[i].ID = "ADR" + individual.ContactMedium[i].AddressType + individual.ID
+		} else {
+			if individual.ContactMedium[i].ID == "" {
+				individual.ContactMedium[i].ID = generateUniqueID("CTM")
 			}
-			fmt.Printf("ADDRESS UNIQUE:%s TYPE: %s (%s)\n", individual.ContactMedium[i].ID, individual.ContactMedium[i].MediumType, individual.ContactMedium[i].Street1)
 		}
+		fmt.Printf("ADDRESS UNIQUE:%s TYPE: %s (%s)\n", individual.ContactMedium[i].ID, individual.ContactMedium[i].MediumType, individual.ContactMedium[i].Street1)
+
 		individual.ContactMedium[i].AuditTrail.CreationDate = time.Now()
 		individual.ContactMedium[i].AuditTrail.CreatedBy = createdBy
 		individual.ContactMedium[i].AuditTrail.ModificationDate = time.Now()
@@ -80,7 +85,7 @@ func (s *PartyService) CreateIndividual(individual *model.Individual) (*model.In
 			fmt.Printf("CHARACTERISTIC UNIQUE:%s TYPE: %s\n", individual.Characteristic[i].ID, individual.Characteristic[i].Name)
 		}
 	}
-
+	fmt.Printf("Individual Struct: %v\n", individual)
 	return s.partyRepo.Create(individual)
 }
 

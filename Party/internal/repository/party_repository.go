@@ -2,12 +2,9 @@ package repository
 
 import (
 	"errors"
-	"math/rand"
-	"strconv"
-	"strings"
-	"time"
-
+	"fmt"
 	"party/internal/model"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -33,6 +30,7 @@ func (r *PartyRepository) Create(individual *model.Individual) (*model.Individua
 			return err
 		}
 		addrList, addrExtList := model.MapIndividualToPartyAddress(individual)
+		fmt.Printf("Address: %v \nExtension: %v\n", addrList, addrExtList)
 		for _, addr := range addrList {
 			if err := tx.Create(&addr).Error; err != nil {
 				return err
@@ -106,7 +104,7 @@ func (r *PartyRepository) GetByID(id string) (*model.Individual, error) {
 // GetByIdentification retrieves a party by ID type and number
 func (r *PartyRepository) GetByIdentification(idType, idNumber string) (*model.Individual, error) {
 	var party model.Party
-
+	fmt.Printf("ID Type: %s, ID Number: %s\n", idType, idNumber)
 	err := r.db.Where("id_type = ? AND id_numb = ?", idType, idNumber).First(&party).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -296,7 +294,7 @@ func (r *PartyRepository) UpdateStatus(id string, status string) error {
 // AddCharacteristic adds a new characteristic to a party
 func (r *PartyRepository) AddAttributes(PartyID string, characteristic *model.CharacteristicItem) error {
 	// Get party to get identification info
-	var party model.Individual
+	var party model.Party
 	if err := r.db.Where("paty_row_id = ?", PartyID).First(&party).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrPartyNotFound
@@ -307,45 +305,4 @@ func (r *PartyRepository) AddAttributes(PartyID string, characteristic *model.Ch
 	attr := model.MapCharacteristicToPartyAttribute(party.ID, party.IDType, party.IDNumber, characteristic)
 
 	return r.db.Create(attr).Error
-}
-
-// Generate a unique 15-char ID
-func generateUniqueID(prefix string) string {
-	// Initialize random number generator
-	randBytes := make([]byte, 2)
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	// Generate random bytes
-	for i := range randBytes {
-		randBytes[i] = byte(r.Intn(256))
-	}
-
-	// Get current timestamp in format YYMMDDHHmm (10 characters)
-	timestamp := time.Now().Format("0601021504")
-
-	// Convert random bytes to readable characters
-	randStr := strconv.FormatInt(int64(randBytes[0])*256+int64(randBytes[1]), 16)
-	if len(randStr) > 2 {
-		randStr = randStr[:2]
-	} else if len(randStr) < 2 {
-		randStr = "0" + randStr
-	}
-
-	// Ensure prefix is exactly 3 characters
-	paddedPrefix := prefix
-	if len(paddedPrefix) > 3 {
-		paddedPrefix = paddedPrefix[:3]
-	} else if len(paddedPrefix) < 3 {
-		paddedPrefix = paddedPrefix + "XXX"[:3-len(paddedPrefix)]
-	}
-
-	// Format into 15 character ID
-	id := paddedPrefix + timestamp + randStr
-	if len(id) > 15 {
-		id = id[:15]
-	} else if len(id) < 15 {
-		id = id + "XXXXXXXXXXXXX"[:15-len(id)]
-	}
-
-	return strings.ToUpper(id)
 }

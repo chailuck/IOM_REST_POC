@@ -35,8 +35,8 @@ type Individual struct {
 	Nationality   string    `json:"nationality"`
 
 	// Core fields - IdentificationItem
-	IDType       string    `json:"individualIdentification.identificationType"`
-	IDNumber     string    `json:"individualIdentification.identificationId"`
+	//IDType       string    `json:"individualIdentification.identificationType"`
+	//IDNumber     string    `json:"individualIdentification.identificationId"`
 	IDExpiryDate time.Time `json:"individualIdentification.validFor.endDateTime"`
 
 	CreationDate     time.Time `json:"@creationDate"`

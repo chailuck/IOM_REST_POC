@@ -81,6 +81,7 @@ func main() {
 	*/
 	srv := iomservice.NewRestService(
 		iomservice.WithRoute(routeServices),
+		iomservice.WithLogger(nil),
 	)
 
 	// Start the service

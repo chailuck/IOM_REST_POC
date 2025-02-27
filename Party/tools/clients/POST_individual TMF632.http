@@ -30,7 +30,7 @@ curl -X POST  -H "Content-Type:application/json"
         {
             "@type": "IndividualIdentification",
             "identificationType": "01",
-            "identificationId": "31111111111",
+            "identificationId": "31111111119",
             "validFor": {
                 "endDateTime": "2027-10-21T07:49:25.246Z"
             }
@@ -52,16 +52,17 @@ curl -X POST  -H "Content-Type:application/json"
             "phoneNumber": "66834443333 ext 234"
         },
         {
-            "@type": " GeographicAddressContactMedium",
+            "@type": "GeographicAddressContactMedium",
             "@baseType": "ContactMedium",
             "id": "CNTC_LEGAL_ADDR_PATY000001",
             "preferred": true,
             "mediumType": "legalAddress",
-            "street1": "240 Headquarters Plazza",
-            "street2": "East Tower - 10th Floor",
+			"addressType": "01",
+            "street1": "240 Headquarter",
+            "street2": "East Tower",
             "city": "Amphur",
             "stateOrProvince": "Province",
-            "country": "country",
+            "country": "66",
             "postCode": "10240",
             "postcodeSequence": 32,
             "building": "",

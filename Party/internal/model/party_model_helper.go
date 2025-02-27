@@ -19,9 +19,9 @@ func MapIndividualToParty(individual *Individual) (p Party) {
 		Language:        "T",
 		HomePhoneNumber: "",
 
-		IDType:       individual.IDType,
-		IDNumber:     individual.IDNumber,
-		IDExpiryDate: individual.IDExpiryDate,
+		//IDType:       individual.IDType,
+		//IDNumber:     individual.IDNumber,
+		//IDExpiryDate: individual.IDExpiryDate,
 
 		CreationDate:     individual.CreationDate,
 		CreatedBy:        individual.CreatedBy,
@@ -29,6 +29,11 @@ func MapIndividualToParty(individual *Individual) (p Party) {
 		ModifiedBy:       individual.ModifiedBy,
 	}
 
+	if len(individual.IndividualIdentification) == 1 {
+		party.IDType = individual.IndividualIdentification[0].IdentificationType
+		party.IDNumber = individual.IndividualIdentification[0].IdentificationId
+		party.IDExpiryDate = individual.IndividualIdentification[0].ValidFor.EndDateTime
+	}
 	for i := range individual.LanguageAbility {
 		if individual.LanguageAbility[i].IsFavouriteLanguage {
 			party.Language = individual.LanguageAbility[i].LanguageCode
@@ -103,13 +108,14 @@ func MapIndividualToPartyAddress(individual *Individual) (addr []PartyAddress, a
 	var addrExtList []PartyAddressExt
 
 	for i := range individual.ContactMedium {
-		if individual.ContactMedium[i].Type == EntityTypeContactMediumAddress {
+
+		if strings.TrimSpace(individual.ContactMedium[i].Type) == EntityTypeContactMediumAddress {
 
 			addr := PartyAddress{
 				ID:           individual.ContactMedium[i].ID,
 				PartyID:      individual.ID,
-				IDType:       individual.IDType,
-				IDNumber:     individual.IDNumber,
+				IDType:       individual.IndividualIdentification[0].IdentificationType,
+				IDNumber:     individual.IndividualIdentification[0].IdentificationId,
 				AddressType:  individual.ContactMedium[i].AddressType,
 				Street1:      individual.ContactMedium[i].Street1,
 				Street2:      individual.ContactMedium[i].Street2,
@@ -123,8 +129,8 @@ func MapIndividualToPartyAddress(individual *Individual) (addr []PartyAddress, a
 			}
 			addrExt := PartyAddressExt{
 				ID:           individual.ContactMedium[i].ID,
-				IDType:       individual.IDType,
-				IDNumber:     individual.IDNumber,
+				IDType:       individual.IndividualIdentification[0].IdentificationType,
+				IDNumber:     individual.IndividualIdentification[0].IdentificationId,
 				AddressType:  individual.ContactMedium[i].AddressType,
 				AmphurName:   individual.ContactMedium[i].Amphur,
 				BuildingName: individual.ContactMedium[i].Building,
@@ -142,13 +148,13 @@ func MapIndividualToPartyAddress(individual *Individual) (addr []PartyAddress, a
 				ModifiedBy:   individual.ContactMedium[i].AuditTrail.ModifiedBy,
 			}
 
-			for i := range individual.ContactMedium[i].ExternalReference {
-				if individual.ContactMedium[i].ExternalReference[i].Type == EntityTypeExternalRef {
-					if individual.ContactMedium[i].ExternalReference[i].IdentifierType == EntityTypeExternalRefTypeBillingExtID {
-						addr.BillingExtID = strings.TrimSpace(individual.ContactMedium[i].ExternalReference[i].Name)
+			for j := range individual.ContactMedium[i].ExternalReference {
+				if individual.ContactMedium[i].ExternalReference[j].Type == EntityTypeExternalRef {
+					if individual.ContactMedium[i].ExternalReference[j].IdentifierType == EntityTypeExternalRefTypeBillingExtID {
+						addr.BillingExtID = strings.TrimSpace(individual.ContactMedium[i].ExternalReference[j].Name)
 					}
-					if individual.ExternalReference[i].IdentifierType == EntityTypeExternalRefTypeExtID {
-						addr.ExtID = strings.TrimSpace(individual.ContactMedium[i].ExternalReference[i].Name)
+					if individual.ContactMedium[i].ExternalReference[j].IdentifierType == EntityTypeExternalRefTypeExtID {
+						addr.ExtID = strings.TrimSpace(individual.ContactMedium[i].ExternalReference[j].Name)
 					}
 				}
 			}
@@ -166,8 +172,8 @@ func MapIndividualToPartyAttribute(individual *Individual) (attr []PartyAttribut
 		attr := PartyAttributes{
 			ID:       individual.Characteristic[i].ID,
 			PartyID:  individual.ID,
-			IDType:   individual.IDType,
-			IDNumber: individual.IDNumber,
+			IDType:   individual.IndividualIdentification[0].IdentificationType,
+			IDNumber: individual.IndividualIdentification[0].IdentificationId,
 			//BillingExtID
 			//ExtID
 			Name:         individual.Characteristic[i].Name,
@@ -236,9 +242,6 @@ func MapPartyToIndividual(party Party, addrList []PartyAddress, addrExtList []Pa
 		MaritalStatus: party.MaritalStatus,
 		Nationality:   party.Nationality,
 		// Core field
-		IDType:           party.IDType,
-		IDNumber:         party.IDNumber,
-		IDExpiryDate:     party.IDExpiryDate,
 		CreationDate:     party.CreationDate,
 		CreatedBy:        party.CreatedBy,
 		ModificationDate: party.ModificationDate,
