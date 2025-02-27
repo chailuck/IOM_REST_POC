@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -24,82 +23,26 @@ func NewPartyRepository(db *gorm.DB) *PartyRepository {
 }
 
 // Create creates a new party record with related entities
-func (r *PartyRepository) Create(party *model.Individual) (*model.Individual, error) {
+func (r *PartyRepository) Create(individual *model.Individual) (*model.Individual, error) {
 	// Prepare the data for the database
-	model.PrepareIndividualForDB(party)
+	//model.PrepareIndividualForDB(individual)
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
-		// Create the main party record
+		party := model.MapIndividualToParty(individual)
 		if err := tx.Create(party).Error; err != nil {
 			return err
 		}
-
-		// Create related addresses and address extensions
-		for _, contactMedium := range party.ContactMedium {
-			if contactMedium.MediumType == "address" {
-				// Create address record
-				address := model.PartyAddress{
-					ID:           contactMedium.ID,
-					PartyID:      party.ID,
-					IDType:       party.IDType,
-					IDNumber:     party.IDNumber,
-					AddressType:  contactMedium.AddressType,
-					Street1:      contactMedium.Street1,
-					Street2:      contactMedium.Street2,
-					Country:      contactMedium.Country,
-					PostalCode:   contactMedium.PostalCode,
-					PostcodeSeq:  contactMedium.PostcodeSeq,
-					CreatedDate:  party.CreationDate,
-					CreatedBy:    party.CreatedBy,
-					ModifiedDate: party.ModificationDate,
-					ModifiedBy:   party.ModifiedBy,
-				}
-				fmt.Printf("Address ID: %s, Object: %p", address.ID, &address)
-				if err := tx.Create(&address).Error; err != nil {
-					return err
-				}
-
-				// Create address extension record
-				addressExt := model.PartyAddressExt{
-					ID:           contactMedium.ID,
-					IDType:       party.IDType,
-					IDNumber:     party.IDNumber,
-					AddressType:  contactMedium.AddressType,
-					BuildingName: contactMedium.Building,
-					HomeNo:       contactMedium.HomeNumber,
-					Moo:          contactMedium.Moo,
-					TumbolName:   contactMedium.Tumbol,
-					CityName:     contactMedium.City,
-					AccomType:    contactMedium.AccomodationType,
-					TimeAtAddr:   contactMedium.TimeAtAddress,
-					ZipCode:      contactMedium.PostalCode,
-					CreatedDate:  party.CreationDate,
-					CreatedBy:    party.CreatedBy,
-					ModifiedDate: party.ModificationDate,
-					ModifiedBy:   party.ModifiedBy,
-				}
-
-				if err := tx.Create(&addressExt).Error; err != nil {
-					return err
-				}
-			}
-		}
-
-		// Create related characteristics
-		for _, characteristic := range party.Characteristics {
-			characteristic.PartyID = party.ID
-			characteristic.IDType = party.IDType
-			characteristic.IDNumber = party.IDNumber
-			characteristic.CreatedDate = party.CreationDate
-			characteristic.CreatedBy = party.CreatedBy
-			characteristic.ModifiedDate = party.ModificationDate
-			characteristic.ModifiedBy = party.ModifiedBy
-
-			if err := tx.Create(&characteristic).Error; err != nil {
+		addrList, addrExtList := model.MapIndividualToPartyAddress(individual)
+		for _, addr := range addrList {
+			if err := tx.Create(&addr).Error; err != nil {
 				return err
 			}
 		}
-
+		for _, addrExt := range addrExtList {
+			if err := tx.Create(&addrExt).Error; err != nil {
+				return err
+			}
+		}
 		return nil
 	})
 
@@ -108,14 +51,14 @@ func (r *PartyRepository) Create(party *model.Individual) (*model.Individual, er
 	}
 
 	// Prepare the data for API response
-	model.PrepareIndividualForAPI(party)
+	// model.PrepareIndividualForAPI(individual)
 
-	return party, nil
+	return individual, nil
 }
 
 // GetByID retrieves a party by its ID with all related entities
 func (r *PartyRepository) GetByID(id string) (*model.Individual, error) {
-	var party model.Individual
+	var party model.Party
 
 	// Get the party record
 	err := r.db.Where("paty_row_id = ?", id).First(&party).Error
@@ -127,13 +70,15 @@ func (r *PartyRepository) GetByID(id string) (*model.Individual, error) {
 	}
 
 	// Get addresses
-	var addresses []model.PartyAddress
-	if err := r.db.Where("paty_row_id = ?", id).Find(&addresses).Error; err != nil {
+	var addrList []model.PartyAddress
+	if err := r.db.Where("paty_row_id = ?", id).Find(&addrList).Error; err != nil {
 		return nil, err
 	}
 
 	// Get address extensions
-	for _, addr := range addresses {
+	var addrExtList []model.PartyAddressExt
+
+	for _, addr := range addrList {
 		var addrExt model.PartyAddressExt
 		if err := r.db.Where("addr_row_id = ?", addr.ID).First(&addrExt).Error; err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -142,59 +87,25 @@ func (r *PartyRepository) GetByID(id string) (*model.Individual, error) {
 			// Skip if extension not found
 			continue
 		}
-
-		// Create ContactMedium from address
-		contactMedium := model.ContactMedium{
-			ID:               addr.ID,
-			MediumType:       "address",
-			PartyID:          addr.PartyID,
-			Preferred:        false, // Default value
-			AddressType:      addr.AddressType,
-			Street1:          addr.Street1,
-			Street2:          addr.Street2,
-			Country:          addr.Country,
-			PostalCode:       addr.PostalCode,
-			PostcodeSeq:      addr.PostcodeSeq,
-			Building:         addrExt.BuildingName,
-			HomeNumber:       addrExt.HomeNo,
-			Moo:              addrExt.Moo,
-			Tumbol:           addrExt.TumbolName,
-			City:             addrExt.CityName,
-			AccomodationType: addrExt.AccomType,
-			TimeAtAddress:    addrExt.TimeAtAddr,
-		}
-
-		party.ContactMedium = append(party.ContactMedium, contactMedium)
+		addrExtList = append(addrExtList, addrExt)
 	}
-
-	// Add phone as ContactMedium if present
-	if party.HomePhoneNumber != "" {
-		phoneContact := model.ContactMedium{
-			ID:          generateUniqueID("CNT"),
-			MediumType:  "phone",
-			PartyID:     party.ID,
-			Preferred:   true, // Assume phone is preferred
-			PhoneNumber: party.HomePhoneNumber,
-		}
-		party.ContactMedium = append(party.ContactMedium, phoneContact)
-	}
-
 	// Get characteristics
-	var characteristics []model.Characteristic
-	if err := r.db.Where("paty_row_id = ?", id).Find(&characteristics).Error; err != nil {
+	var attrList []model.PartyAttributes
+	if err := r.db.Where("paty_row_id = ?", id).Find(&attrList).Error; err != nil {
 		return nil, err
 	}
-	party.Characteristics = characteristics
+
+	individual := model.MapPartyToIndividual(party, addrList, addrExtList, attrList)
 
 	// Prepare the data for API response
-	model.PrepareIndividualForAPI(&party)
+	//model.PrepareIndividualForAPI(&party)
 
-	return &party, nil
+	return &individual, nil
 }
 
 // GetByIdentification retrieves a party by ID type and number
 func (r *PartyRepository) GetByIdentification(idType, idNumber string) (*model.Individual, error) {
-	var party model.Individual
+	var party model.Party
 
 	err := r.db.Where("id_type = ? AND id_numb = ?", idType, idNumber).First(&party).Error
 	if err != nil {
@@ -209,109 +120,54 @@ func (r *PartyRepository) GetByIdentification(idType, idNumber string) (*model.I
 }
 
 // Update updates an existing party and its related entities
-func (r *PartyRepository) Update(party *model.Individual) (*model.Individual, error) {
+func (r *PartyRepository) Update(individual *model.Individual) (*model.Individual, error) {
 	// Prepare the data for the database
-	model.PrepareIndividualForDB(party)
+	//model.PrepareIndividualForDB(party)
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
+		party := model.MapIndividualToParty(individual)
+
 		// Update main party record
+
 		party.ModificationDate = time.Now()
 		if err := tx.Save(party).Error; err != nil {
 			return err
 		}
 
-		// Delete existing addresses
-		if err := tx.Where("paty_row_id = ?", party.ID).Delete(&model.PartyAddress{}).Error; err != nil {
-			return err
-		}
-
-		// Delete existing address extensions
-		if err := tx.Where("id_type = ? AND id_numb = ?", party.IDType, party.IDNumber).Delete(&model.PartyAddressExt{}).Error; err != nil {
-			return err
-		}
-
-		// Create updated addresses and address extensions
-		for _, contactMedium := range party.ContactMedium {
-			if contactMedium.MediumType == "address" {
-				// Create address record
-				address := model.PartyAddress{
-					ID:           contactMedium.ID,
-					PartyID:      party.ID,
-					IDType:       party.IDType,
-					IDNumber:     party.IDNumber,
-					AddressType:  contactMedium.AddressType,
-					Street1:      contactMedium.Street1,
-					Street2:      contactMedium.Street2,
-					Country:      contactMedium.Country,
-					PostalCode:   contactMedium.PostalCode,
-					PostcodeSeq:  contactMedium.PostcodeSeq,
-					CreatedDate:  party.CreationDate,
-					CreatedBy:    party.CreatedBy,
-					ModifiedDate: party.ModificationDate,
-					ModifiedBy:   party.ModifiedBy,
+		addrList, addrExtList := model.MapIndividualToPartyAddress(individual)
+		for _, addr := range addrList {
+			var queryAddr []model.PartyAddress
+			err := r.db.Where("paty_row_id = ? and addr_type = ?", party.ID, addr.AddressType).Find(&queryAddr).Error
+			if err != nil {
+				if len(queryAddr) > 1 {
+					return model.ErrMoreThanOneEntityFound
 				}
-
-				if err := tx.Create(&address).Error; err != nil {
-					return err
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return model.ErrPartyNotFound
 				}
-
-				// Create address extension record
-				addressExt := model.PartyAddressExt{
-					ID:           contactMedium.ID,
-					IDType:       party.IDType,
-					IDNumber:     party.IDNumber,
-					AddressType:  contactMedium.AddressType,
-					BuildingName: contactMedium.Building,
-					HomeNo:       contactMedium.HomeNumber,
-					Moo:          contactMedium.Moo,
-					TumbolName:   contactMedium.Tumbol,
-					CityName:     contactMedium.City,
-					AccomType:    contactMedium.AccomodationType,
-					TimeAtAddr:   contactMedium.TimeAtAddress,
-					ZipCode:      contactMedium.PostalCode,
-					CreatedDate:  party.CreationDate,
-					CreatedBy:    party.CreatedBy,
-					ModifiedDate: party.ModificationDate,
-					ModifiedBy:   party.ModifiedBy,
-				}
-
-				if err := tx.Create(&addressExt).Error; err != nil {
-					return err
-				}
-			}
-		}
-
-		// Delete existing characteristics
-		if err := tx.Where("paty_row_id = ?", party.ID).Delete(&model.Characteristic{}).Error; err != nil {
-			return err
-		}
-
-		// Create updated characteristics
-		for _, characteristic := range party.Characteristics {
-			characteristic.PartyID = party.ID
-			characteristic.IDType = party.IDType
-			characteristic.IDNumber = party.IDNumber
-			characteristic.CreatedDate = party.CreationDate
-			characteristic.CreatedBy = party.CreatedBy
-			characteristic.ModifiedDate = party.ModificationDate
-			characteristic.ModifiedBy = party.ModifiedBy
-
-			if err := tx.Create(&characteristic).Error; err != nil {
 				return err
 			}
-		}
+			addr_id := queryAddr[0].ID
 
+			if err := tx.Where("paty_row_id = ? and addr_id and addr_type = ?", party.ID, addr_id, addr.AddressType).Save(addr).Error; err != nil {
+				return err
+			}
+			for _, addrExt := range addrExtList {
+				if addrExt.AddressType == addr.AddressType {
+					if err := tx.Where("addr_id = ? and addr_type = ?", addrExt.ID, addrExt.AddressType).Save(addrExt).Error; err != nil {
+						return err
+					}
+				}
+			}
+		}
 		return nil
-	})
+	}) //commit tx
 
 	if err != nil {
 		return nil, err
 	}
 
-	// Prepare the data for API response
-	model.PrepareIndividualForAPI(party)
-
-	return party, nil
+	return individual, nil
 }
 
 // Delete deletes a party and all related entities
@@ -344,8 +200,8 @@ func (r *PartyRepository) Delete(id string) error {
 			return err
 		}
 
-		// Delete characteristics
-		if err := tx.Where("paty_row_id = ?", id).Delete(&model.Characteristic{}).Error; err != nil {
+		// Delete attributes
+		if err := tx.Where("paty_row_id = ?", id).Delete(&model.PartyAttributes{}).Error; err != nil {
 			return err
 		}
 
@@ -408,10 +264,10 @@ func (r *PartyRepository) List(params model.PartyQueryParams) ([]model.Individua
 }
 
 // GetByCharacteristic retrieves parties by characteristic name and value
-func (r *PartyRepository) GetByCharacteristic(name, value string) ([]model.Individual, error) {
+func (r *PartyRepository) GetByAttributes(name, value string) ([]model.Individual, error) {
 	var partyIDs []string
 
-	err := r.db.Model(&model.Characteristic{}).
+	err := r.db.Model(&model.PartyAttributes{}).
 		Where("attr_name = ? AND attr_vlue = ?", name, value).
 		Pluck("paty_row_id", &partyIDs).Error
 	if err != nil {
@@ -438,25 +294,19 @@ func (r *PartyRepository) UpdateStatus(id string, status string) error {
 }
 
 // AddCharacteristic adds a new characteristic to a party
-func (r *PartyRepository) AddCharacteristic(characteristic *model.Characteristic) error {
+func (r *PartyRepository) AddAttributes(PartyID string, characteristic *model.CharacteristicItem) error {
 	// Get party to get identification info
 	var party model.Individual
-	if err := r.db.Where("paty_row_id = ?", characteristic.PartyID).First(&party).Error; err != nil {
+	if err := r.db.Where("paty_row_id = ?", PartyID).First(&party).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrPartyNotFound
 		}
 		return err
 	}
 
-	// Fill in required fields
-	characteristic.IDType = party.IDType
-	characteristic.IDNumber = party.IDNumber
-	characteristic.CreatedDate = time.Now()
-	characteristic.CreatedBy = "system" // Or pass in from context
-	characteristic.ModifiedDate = time.Now()
-	characteristic.ModifiedBy = "system" // Or pass in from context
+	attr := model.MapCharacteristicToPartyAttribute(party.ID, party.IDType, party.IDNumber, characteristic)
 
-	return r.db.Create(characteristic).Error
+	return r.db.Create(attr).Error
 }
 
 // Generate a unique 15-char ID

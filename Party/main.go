@@ -45,10 +45,10 @@ func main() {
 
 	// Auto-migrate schemas
 	err = db.AutoMigrate(
-		&model.Individual{},
+		&model.Party{},
 		&model.PartyAddress{},
-		&model.Characteristic{},
-		&model.ContactMedium{},
+		&model.PartyAddressExt{},
+		&model.PartyAttributes{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to migrate database schemas: %v", err)

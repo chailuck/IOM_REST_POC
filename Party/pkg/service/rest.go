@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"party/internal/model"
@@ -29,10 +30,11 @@ func (s RestService) POST_V1_Individual(ctx iom.Context, serviceRequest interfac
 	var req model.Individual
 	err = json.Unmarshal(serviceRequest.([]byte), &req)
 	if err != nil {
-		return nil, errors.New("invalid request format")
+		errMessage := fmt.Sprintf("invalid request format (%v)", err)
+		return nil, errors.New(errMessage)
 	}
 
-	res, err := PartyService.CreateParty(&req)
+	res, err := PartyService.CreateIndividual(&req)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +52,7 @@ func (s RestService) POST_V1_Individual(ctx iom.Context, serviceRequest interfac
 // @Failure 500 {object} model.Failure
 // @Router /partyManagement/v1/individual/{id} [get]
 // func (s RestService) Get_Individual_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
-func (s RestService) GET_V1_Individual_Id_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+func (s RestService) GET_V1_Individual_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
 	id := ctx.Routing.Params("id")
 
 	res, err := PartyService.GetParty(id)
@@ -73,7 +75,7 @@ func (s RestService) GET_V1_Individual_Id_ById(ctx iom.Context, serviceRequest i
 // @Failure 500 {object} model.Failure
 // @Router /partyManagement/v1/individual/{id} [put]
 // func (s RestService) Update_Individual_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
-func (s RestService) PATCH_V1_Individual_Id_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+func (s RestService) PATCH_V1_Individual_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
 	id := ctx.Routing.Params("id")
 
 	var req model.Individual
@@ -82,7 +84,7 @@ func (s RestService) PATCH_V1_Individual_Id_ById(ctx iom.Context, serviceRequest
 		return nil, errors.New("invalid request format")
 	}
 
-	res, err := PartyService.UpdateParty(id, &req)
+	res, err := PartyService.UpdateIndividual(id, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +101,7 @@ func (s RestService) PATCH_V1_Individual_Id_ById(ctx iom.Context, serviceRequest
 // @Failure 404 {object} model.Failure
 // @Failure 500 {object} model.Failure
 // @Router /partyManagement/v1/individual/{id} [delete]
-func (s RestService) DELETE_V1_Individual_Id_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+func (s RestService) DELETE_V1_Individual_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
 	id := ctx.Routing.Params("id")
 
 	err = PartyService.DeleteParty(id)
@@ -156,7 +158,7 @@ func (s RestService) List_Individual(ctx iom.Context, serviceRequest interface{}
 // @Failure 404 {object} model.Failure
 // @Failure 500 {object} model.Failure
 // @Router /partyManagement/v1/individual/{id} [patch]
-func (s RestService) Patch_Individual_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
+func (s RestService) PATCH_Individual_ById(ctx iom.Context, serviceRequest interface{}) (serviceResponse interface{}, err error) {
 	id := ctx.Routing.Params("id")
 
 	var req model.Individual
@@ -173,7 +175,7 @@ func (s RestService) Patch_Individual_ById(ctx iom.Context, serviceRequest inter
 
 	// Add other field merges as needed
 
-	res, err := PartyService.UpdateParty(id, existing)
+	res, err := PartyService.UpdateIndividual(id, existing)
 	if err != nil {
 		return nil, err
 	}

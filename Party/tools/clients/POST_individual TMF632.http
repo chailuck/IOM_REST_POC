@@ -1,0 +1,187 @@
+curl -X POST  -H "Content-Type:application/json" 
+-d 
+'{
+    "@type": "INDY",
+    "@creationDate": "2018-10-22T07:49:25.246Z",
+    "@createdBy": "user0001",
+    "@modificationDate": "2018-10-22T07:49:25.246Z",
+    "@modifiedBy": "user0001",
+    "id": "PATY000001",
+    "title": "Mr.",
+    "givenName": "Testfirstname",
+    "familyName": "Testlastname",
+    "maritalStatus": "S",
+    "gender": "M",
+    "nameType": "INDY",
+    "nationality": "THA",
+    "externalReference": [
+        {
+            "name": "23424324324",
+            "externalIdentifierType": "PartyExtBillingID",
+            "@type": "ExternalIdentifier"
+        },
+        {
+            "name": "4445555",
+            "externalIdentifierType": "PartyExtID",
+            "@type": "ExternalIdentifier"
+        }
+    ],
+    "individualIdentification": [
+        {
+            "@type": "IndividualIdentification",
+            "identificationType": "01",
+            "identificationId": "31111111111",
+            "validFor": {
+                "endDateTime": "2027-10-21T07:49:25.246Z"
+            }
+        }
+    ],
+    "languageAbility": [
+        {
+            "languageCode": "E",
+            "isFavouriteLanguage": true
+        }
+    ],
+    "contactMedium": [
+        {
+            "id": "CNTC_HOME_PHONE_PATY000001",
+            "@type": " PhoneContactMedium",
+            "@baseType": "ContactMedium",
+            "mediumType": "homePhoneNumber",
+            "preferred": true,
+            "phoneNumber": "66834443333 ext 234"
+        },
+        {
+            "@type": " GeographicAddressContactMedium",
+            "@baseType": "ContactMedium",
+            "id": "CNTC_LEGAL_ADDR_PATY000001",
+            "preferred": true,
+            "mediumType": "legalAddress",
+            "street1": "240 Headquarters Plazza",
+            "street2": "East Tower - 10th Floor",
+            "city": "Amphur",
+            "stateOrProvince": "Province",
+            "country": "country",
+            "postCode": "10240",
+            "postcodeSequence": 32,
+            "building": "",
+            "homenumber": "333",
+            "moo": "3",
+            "tumbol": "tumnol",
+            "accomdationType": "HOME",
+            "time_at_addr": "XXX",
+            "externalReference": [
+                {
+                    "name": "23424324324",
+                    "externalIdentifierType": "AddressExtBillingID",
+                    "@type": "ExternalIdentifier"
+                },
+                {
+                    "name": "4445555",
+                    "externalIdentifierType": "AddressExtID",
+                    "@type": "ExternalIdentifier"
+                }
+            ]
+        }
+    ],
+    "characteristic": [
+        {
+            "name": "occupationCode",
+            "value": "502",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "timeInBusiness",
+            "value": "0101",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "salaryLevel",
+            "value": "1",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "grade",
+            "value": "1",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "largeCustomerIndicator",
+            "value": "78",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "subscriberType",
+            "value": "RPI",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "sourceCustomerType",
+            "value": "73",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "parentTitle",
+            "value": "Miss",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "parentFirstName",
+            "value": "Parfirst",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "parentLastName",
+            "value": "Parlast",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "parentContact",
+            "value": "664444444",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "parentId",
+            "value": "344455432452342",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "totalNoOfSubscriber",
+            "value": "5",
+            "valueType": "number",
+            "@type": "IntegerCharacteristic"
+        },
+        {
+            "name": "maxAllowOnlySubscriber",
+            "value": "5",
+            "valueType": "number",
+            "@type": "IntegerCharacteristic"
+        },
+        {
+            "name": "dealPool",
+            "value": "DEALPOOL",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        },
+        {
+            "name": "<attr_name>",
+            "value": "<attr_value>",
+            "valueType": "String",
+            "@type": "StringCharacteristic"
+        }
+    ]
+}'
+
+http://localhost:9999/party/api/partymanagement/V1/individual

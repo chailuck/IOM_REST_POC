@@ -12,7 +12,6 @@ curl -X POST  -H "Content-Type:application/json"
     }
   ],
   "language": "T",
-  "phoneNumber": "0891234567",
   "title": "Mr.",
   "givenName": "Somchai",
   "familyName": "Jaidee",
@@ -103,9 +102,9 @@ curl -X POST  -H "Content-Type:application/json"
   
   "contactMedium": [
     {
-      "type": "phone",
+      "type": "phoneNumber",
       "preferred": true,
-      "phoneNumber": "0891234567"
+      "phoneNumber": "088888888"
     },
     {
       "type": "address",

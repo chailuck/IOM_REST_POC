@@ -16,7 +16,7 @@ var (
 )
 
 // validateAddressUpdate validates address updates
-func (s *PartyService) validateAddressUpdate(addresses []model.ContactMedium) error {
+func (s *PartyService) validateAddressUpdate(addresses []model.ContactMediumItem) error {
 	for _, addr := range addresses {
 		if err := addr.Validate(); err != nil {
 			return err
@@ -26,7 +26,7 @@ func (s *PartyService) validateAddressUpdate(addresses []model.ContactMedium) er
 }
 
 // validateCharacteristicUpdate validates characteristic updates
-func (s *PartyService) validateCharacteristicUpdate(characteristics []model.Characteristic) error {
+func (s *PartyService) validateCharacteristicUpdate(characteristics []model.CharacteristicItem) error {
 	for _, char := range characteristics {
 		if err := char.Validate(); err != nil {
 			return err
@@ -36,7 +36,7 @@ func (s *PartyService) validateCharacteristicUpdate(characteristics []model.Char
 }
 
 // validateContactMedium validates contact medium data
-func (s *PartyService) validateContactMedium(mediums []model.ContactMedium) error {
+func (s *PartyService) validateContactMedium(mediums []model.ContactMediumItem) error {
 	seenPreferred := false
 	for _, medium := range mediums {
 		if medium.Preferred {
@@ -75,7 +75,7 @@ func (s *PartyService) validatePartyUpdate(party *model.Individual) error {
 		return err
 	}
 
-	if err := s.validateCharacteristicUpdate(party.Characteristics); err != nil {
+	if err := s.validateCharacteristicUpdate(party.Characteristic); err != nil {
 		return err
 	}
 
